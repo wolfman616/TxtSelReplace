@@ -34,7 +34,7 @@ TxtSelReplace(action="") {
 		}
 		sendmessage,2161,"",Sci_SelTxtPTR,,ahk_id %cWnd%		;GETSELTEXT:=2161;
 		success:= DllCall("ReadProcessMemory","Ptr",hProc,"Ptr",Sci_SelTxtPTR,"Ptr",&RX_SCITXT,"UPtr",Sci_FullLen,"Ptr","")
-		SCITXTDECoDED:= byte2string("RX_SCITXT")
+		SCITXTDECoDED:= Byte2Str("RX_SCITXT")
 		if(Sci_FullLen) {
 			switch,action {
 				case,"upper" : sel2:=uppercase(SCITXTDECoDED)
@@ -108,6 +108,12 @@ TxtSelReplace(action="") {
 	return,1
 }
 
+Byte2Str(Bytes_VarName="",len="",CodePg="CP936") {
+	static CP:="CP936"
+	(CodePg!="CP936"? CP:= CodePg)
+	return,ret:= strget(&(%Bytes_VarName%),len,CP)
+}
+
 UPPERCASE(target="") { 
  return,regexreplace(target,"(\w)","$U1$2")
 }
@@ -158,9 +164,9 @@ Capitalise(target="") { ;(\b\w)(.*?)||(s(?=cript))
 }
 
 CapitaliseWithWords(target="") { ;regexreplace(target,"(((\b\w)(.*?))|(s)(?=cript))","$U1")
- static X:= "I,AHK,AutoHotkey,Var,Obj,replace,get," ;always Capitalised;
- S:= RegExReplace(RegExReplace(target,"(.*)","$L{1}"),"(?<=[\.\!\?]\s|\n).|^.","$U{0}")
- Loop,Parse,X, `, ;Parse the exceptions
+ static X:= "I,AHK,AutoHotkey,Var,Obj,replace,get,append" ;always Capitalised;
+ S:= RegExReplace(target,"(\b\w)(.*?)","$U1$2")
+ Loop,Parse,% X,`, ;Parse the exceptions
   S:= RegExReplace(S,"i)\b" A_LoopField "\b", A_LoopField)
  return,S
 }
