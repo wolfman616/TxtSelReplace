@@ -68,9 +68,15 @@ TxtSelReplace(action="") {
 					case,	"0"		: TX_t:= "1"
 					default			: Notice:= True
 				} if(Notice) {
-					(isHex:=instr(SCiTxTrX,"0x")? EndAppend:= strlen(TX_t:= FormatDec(SCiTxTrX)) -strlen(SCiTxTrX) 
-					: (isInt(SCiTxTrX)? EndAppend:=strlen(TX_t:= FormatHex(SCiTxTrX))-strlen(SCiTxTrX)))
+					(isHex:=instr(SCiTxTrX,"0x")? (EndAppend:= strlen(TX_t:= FormatDec(SCiTxTrX)) -strlen(SCiTxTrX) )
+					: (isInt(SCiTxTrX)? (EndAppend:=strlen(TX_t:= FormatHex(SCiTxTrX))-strlen(SCiTxTrX)) : NotFound:=True))
 					Notice:= False
+					if(NotFound) {
+						sendmessage,2143,0,0,,ahk_id %cWnd% 
+						sendmessage,2190,% SelStart:= Errorlevel,0,,ahk_id %cWnd% ;SETTARGETSTART:=2190
+						sendmessage,2160,SelStart,SelStart,,ahk_id %cWnd%			;SETSEL:=2160
+						return,0
+					}
 				}
 		}
 		sendmessage,2143,0,0,,ahk_id %cWnd% 
@@ -79,12 +85,12 @@ TxtSelReplace(action="") {
 		sendmessage,2192,% SelEnd:= Errorlevel,0,,ahk_id %cWnd%  ;SETTARGETEND:=2192
 		sendmessage,2160,SelStart,SelEnd,,ahk_id %cWnd%			;SETSEL:=2160
 		if(!(len2:= SelEnd-SelStart)>0)
-			return,
+			return,0
 		len2++	;considering null-term;
-		VarSetCapacity(vAlloxStr,(len2)*2+1,0)
+		VarSetCapacity(vAlloxStr,(len2)*2,0)
 		, StrPut(TX_t,&vAlloxStr,"UTF-8")
 		, vAlloxAddress:= DllCall("VirtualAllocEx","Ptr",(hProc:= DllCall("OpenProcess","UInt",0x438,"Int",False,"UInt",PID
-		,"Ptr")),"Ptr",0,"UPtr",len2+1,"UInt",0x1000,"UInt",4,"Ptr")
+		,"Ptr")),"Ptr",0,"UPtr",len2,"UInt",0x1000,"UInt",4,"Ptr")
 		, success:= DllCall("WriteProcessMemory","Ptr",hProc,"Ptr",vAlloxAddress,"Ptr",&vAlloxStr,"Uint",len2+1,"UInt*","","Int")
 		EndAppend? SelEnd+=EndAppend:()
 		StartAppend? SelStart+=StartAppend:()
@@ -95,7 +101,8 @@ TxtSelReplace(action="") {
 		DllCall("VirtualFreeEx","Ptr",hProc,"Ptr",vAlloxAddress,"UPtr",0,"UInt",0x8000) ;MEM_RELEASE
 		, DllCall("VirtualFreeEx","Ptr",hProc,"Ptr",Sci_SelTxtPTR,"UPtr",0,"UInt",0x8000)!
 		,  DllCall("CloseHandle","Ptr",hProc)
-		return,1
+							return,Ret:= (NotFound? 0 : 1)
+
 	} else,if(instr(cname,"edit")) { ;(!Edit_TextIsSelected(cWnd)? return());
 		ControlGet,sel,Selected,,,ahk_id %cWnd%
 		if(!strlen(sel))
@@ -132,7 +139,7 @@ iNVERT_cASE(Target="") { ;toggle;
 }
 
 CommentLine(target="") { ;toggle;
- return,regexreplace(regexreplace(target,"(\n?)(.+)","$1;$2"),"(;[\s]*[;]+)","")
+ return,RegexReplace(regexreplace(target,"(\n?)(.+)","$1;$2"),"(;[\s]*[;]+)","")
 }
 
 Enclose_Brackets(target="") {
@@ -161,20 +168,23 @@ Enquote(target="") { ;toggle;
 }
 
 UnEnquote(target="") { ; ="(?:^)(" Chr(34) ")|(?:^.)(" chr(34) ")|(" chr(34) ")(?:$)|(" chr(34) ")(?:.$)"
- return,Regexreplace(target,chr(34),"") ;this func not required
+ return,RegExReplace(target,chr(34),"") ;this func not required
 }
 
 Capitalise(target="") { ;(\b\w)(.*?)||(s(?=cript))
- return,Regexreplace(target,"(\b\w)(.*?)","$U1$2")
+ return,Regexreplace(target,"(_?\w)|(\b\w)(?:.*?)","$U1")
 }
 
-CapitaliseWithWords(Target="") { 
-	global static XList ;XList:= "AHK,autohotkey,var,obj,replace,get,append,invert,byte,hex,replace,regex,format,exit,string,target,StrLen" ;always capitalised;
-	S:= RegExReplace(Target,"(\b\w)(.*?)","$U1$2")
-	Loop,Parse,% XList,`, ;Parse exceptions;
-		if(instr(target,A_loopfield))
-			repl:= regexreplace(Repl?Repl:S,"i)(" . SubStr(A_LoopField, 1 , 1) . ")(" .  (GAY:=SubStr(A_LoopField,2,StrLen(A_LoopField)))  . ")","$U1" GAY) 
-	return,repl
+CapitaliseWithWords(Target="") { ;always capitalised;
+	static global  XList := "AHK,AutoHotKey,var,obj,replace,get,app_end,invert,byte,hex,replace,regEx,format,exit,string,target,strLen" 
+	Repl:= Found:= ""
+	try,if(S:= RegExReplace(Target,"(\b\w)(?:.*?)|((_\w)|(\w_))","$U1$2"))
+		Loop,Parse,% XList,`, ;Parse exceptions;
+			if(instr(target,A_loopfield)) {
+				Repl:= regexreplace(Repl?Repl:S,"i)(" . SubStr(a_Loopfield, 1 , 1) . ")(" .  (XL_:=SubStr(A_LoopField,2,StrLen(A_LoopField)))  . ")","$U1$2")
+				Found:= True
+			} (!Found?  Repl:= S)
+	return,Repl
 }
 
 FormatHex(Str_in="") {
