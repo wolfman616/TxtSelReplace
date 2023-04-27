@@ -98,7 +98,7 @@ TxtSelReplace(action="") {
 		(action="unquote")? ((e!=1||f)? (SelStart++, SelEnd--):()):()
 		sendmessage,2142,SelStart,0,,ahk_id %cWnd%		;(SETSELECTIONSTART):=2142;
 		sendmessage,2144,SelEnd,0,,ahk_id %cWnd%		;SETSELECTIONEND:=2144;  
-		DllCall("VirtualFreeEx","Ptr",hProc,"Ptr",vAlloxAddress,"UPtr",0,"UInt",0x8000) ;MEM_RELEASE
+		DllCall("VirtualFreeEx","Ptr",hProc,"Ptr",vAlloxAddress,"UPtr",0,"UInt",0x8000) ; MEM_RELEASE
 		, DllCall("VirtualFreeEx","Ptr",hProc,"Ptr",Sci_SelTxtPTR,"UPtr",0,"UInt",0x8000)!
 		,  DllCall("CloseHandle","Ptr",hProc)
 							return,Ret:= (NotFound? 0 : 1)
@@ -172,16 +172,16 @@ UnEnquote(target="") { ; ="(?:^)(" Chr(34) ")|(?:^.)(" chr(34) ")|(" chr(34) ")(
 }
 
 Capitalise(target="") { ;(\b\w)(.*?)||(s(?=cript))
- return,Regexreplace(target,"(_?\w)|(\b\w)(?:.*?)","$U1")
+ return,Regexreplace(target,"(_?\w)|(\b\w)(?:.*?)","$U1L2")
 }
 
 CapitaliseWithWords(Target="") { ;always capitalised;
-	static global  XList := "AHK,AutoHotKey,var,obj,replace,get,app_end,invert,byte,hex,replace,regEx,format,exit,string,target,strLen" 
+	Static Global  Xlist := "AHK,AutoHotKey,Var,Obj,Replace,Get,App_end,Invert,Byte,Hex,Replace,Regex,Format,Exit,String,Target,StrLen" 
 	Repl:= Found:= ""
-	try,if(S:= RegExReplace(Target,"(\b\w)(?:.*?)|((_\w)|(\w_))","$U1$2"))
+	try,if(S:= RegExReplace(lowercase(target) ,"(\b\w)(?:.*?)|((_\w)|(\w_))","$U1$2"))
 		Loop,Parse,% XList,`, ;Parse exceptions;
 			if(instr(target,A_loopfield)) {
-				Repl:= regexreplace(Repl?Repl:S,"i)(" . SubStr(a_Loopfield, 1 , 1) . ")(" .  (XL_:=SubStr(A_LoopField,2,StrLen(A_LoopField)))  . ")","$U1$2")
+				Repl:= regexreplace(Repl?Repl:S,"i)(" . SubStr(a_Loopfield, 1 , 1) . ")(" .  (XL_:=SubStr(A_LoopField,2,StrLen(A_LoopField)))  . ")",A_loopfield)
 				Found:= True
 			} (!Found?  Repl:= S)
 	return,Repl
