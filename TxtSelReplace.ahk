@@ -58,7 +58,7 @@ TxtSelReplace(action="") {
 					StringTrimright,SCiTxTrX,SCiTxTrX,1
 					((TX_t:= Enquote(SCiTxTrX))? EndAppend:= 2)
 				}
-					case,	"Not"	: switch,SCiTxTrX {
+			case,"Not"	: switch,SCiTxTrX {
 					case,	"true"	: TX_t:= "False", EndAppend:= 1
 					case,	"false"	: TX_t:= "True", EndAppend:= -1
 					case,	"black"	: TX_t:= "White"
@@ -69,7 +69,7 @@ TxtSelReplace(action="") {
 					default			: Notice:= True
 				} if(Notice) {
 					(isHex:=instr(SCiTxTrX,"0x")? (EndAppend:= strlen(TX_t:= FormatDec(SCiTxTrX)) -strlen(SCiTxTrX) )
-					: (isInt(SCiTxTrX)? (EndAppend:=strlen(TX_t:= FormatHex(SCiTxTrX))-strlen(SCiTxTrX)) : NotFound:=True))
+					: (isInt(SCiTxTrX)? (EndAppend:=strlen(TX_t:= FormatHex(SCiTxTrX))-strlen(SCiTxTrX)) : NotFound:= True))
 					Notice:= False
 					if(NotFound) {
 						sendmessage,2143,0,0,,ahk_id %cWnd% 
@@ -101,8 +101,7 @@ TxtSelReplace(action="") {
 		DllCall("VirtualFreeEx","Ptr",hProc,"Ptr",vAlloxAddress,"UPtr",0,"UInt",0x8000) ; MEM_RELEASE
 		, DllCall("VirtualFreeEx","Ptr",hProc,"Ptr",Sci_SelTxtPTR,"UPtr",0,"UInt",0x8000)!
 		,  DllCall("CloseHandle","Ptr",hProc)
-							return,Ret:= (NotFound? 0 : 1)
-
+		return,Ret:= (NotFound? 0 : 1)
 	} else,if(instr(cname,"edit")) { ;(!Edit_TextIsSelected(cWnd)? return());
 		ControlGet,sel,Selected,,,ahk_id %cWnd%
 		if(!strlen(sel))
@@ -113,8 +112,13 @@ TxtSelReplace(action="") {
 			case,"invert" 		: sendmessage,0xC2,1,&sel:= invert_case(sel),,ahk_id %cWnd%
 			case,"reverse" 		: sendmessage,0xC2,1,&sel:= Capitalise(sel)	,,ahk_id %cWnd%
 			case,"commentline"	: sendmessage,0xC2,1,&sel:= Capitalise(sel)	,,ahk_id %cWnd%
+			case,"quote" 		: sendmessage,0xC2,1,&sel:= surround(sel,"quotes"),,ahk_id %cWnd%
 			case,"Capitalise"	: sendmessage,0xC2,1,&sel:= Capitalise(sel)	,,ahk_id %cWnd%
-			case,"CapitaliseWithWords" : sendmessage,0xC2,1,&sel:= Capitalise(sel),,ahk_id %cWnd%
+			case,"CapitaliseWithWords"	: sendmessage,0xC2,1,&sel:= Capitalise(sel),,ahk_id %cWnd%
+			case,"Enclose_Brackets"	:sendmessage,0xC2,1,&sel:= Enclose_Brackets(sel),,ahk_id %cWnd%
+			case,"Enclose_Braces" 	: sendmessage,0xC2,1,&sel:= Enclose_Braces(sel),,ahk_id %cWnd%
+			case,"Enclose_Percents"	: sendmessage,0xC2,1,&sel:= Enclose_Percents(sel),,ahk_id %cWnd%
+			case,"Enclose_Square_Brackets"	: sendmessage,0xC2,1,&sel:= Enclose_Square_Brackets(sel),,ahk_id %cWnd%
 		}
 	return,1
 	}
@@ -151,7 +155,7 @@ Enclose_Square_Brackets(target="") {
 }
 
 Enclose_Braces(target="") {
- return,regexreplace(target,"(.*[\n\r]*)","{$1}")
+ return,"{" target "}"
 }
 
 Enclose_Percents(target="") {
@@ -164,7 +168,7 @@ Surround(input="",SurroundWith="") {
 }
 
 Enquote(target="") { ;toggle;
- return,Regexreplace(target,"(.*[\n\r]*)", surround("$1","quotes")) ;chr(34) "$1" chr(34
+ return,regexmatch(target,"[\r]+")? chr(34) target chr(34) : Regexreplace(target,"(.*[\n\r]*)", surround("$1","quotes")) ;chr(34) "$1" chr(34
 }
 
 UnEnquote(target="") { ; ="(?:^)(" Chr(34) ")|(?:^.)(" chr(34) ")|(" chr(34) ")(?:$)|(" chr(34) ")(?:.$)"
@@ -181,7 +185,7 @@ CapitaliseWithWords(Target="") { ;always capitalised;
 	try,if(S:= RegExReplace(target ,"(\b\w)(?:.*?)|((_\w)|(\w_))","$U1$L2")){
 		Loop,Parse,% XList,`, ;Parse exceptions;
 			if(instr(target,A_loopfield)) {
-				Repl:= regexreplace(Repl?Repl:S,"(" . SubStr(a_Loopfield, 1 , 1) . ")(" .  (XL_:=SubStr(A_LoopField,2,StrLen(A_LoopField)))  . ")",A_loopfield)
+				Repl:= regexreplace(Repl?Repl:S,"(" . SubStr(a_Loopfield, 1 , 1) . ")(" . (XL_:=SubStr(A_LoopField,2,StrLen(A_LoopField))) . ")",A_loopfield)
 				Found:= True
 			} (!Found?  Repl:= S)
 			}
