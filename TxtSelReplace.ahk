@@ -43,7 +43,7 @@ TxtSelReplace(action="") {
 			case,		"Capitalise"	: 	TX_t:= Capitalise(SCiTxTrX)
 			case,"CapitaliseWithWords"	:	TX_t:= CapitaliseWithWords(SCiTxTrX)
 			case,		"CommentLine"	: ((TX_t:= commentline(SCiTxTrX))? 					(EndAppend:= Strlen(TX_t)-strlen(SCiTxTrX)))
-			case,		"invert"		:	(isInt(SCiTxTrX)? (EndAppend:=strlen(TX_t:= FormatHex(SCiTxTrX))-strlen(SCiTxTrX)) : TX_t:= invert_case(SCiTxTrX))
+			case,		"invert"		:	(isInt(SCiTxTrX)? (EndAppend:= strlen(TX_t:= FormatHex(SCiTxTrX))-strlen(SCiTxTrX)) : TX_t:= invert_case(SCiTxTrX))
 			case,		"reverse"		:	TX_t:= Capitalise(SCiTxTrX)
 			case,"Enclose_Brackets"		: ((TX_t:= Enclose_Brackets(SCiTxTrX))? 			(EndAppend:=1, StartAppend:= 1))
 			case,"Enclose_Square_Brackets"	: ((TX_t:= Enclose_Square_Brackets(SCiTxTrX))?	(EndAppend:=1, StartAppend:= 1))
@@ -58,7 +58,7 @@ TxtSelReplace(action="") {
 					StringTrimright,SCiTxTrX,SCiTxTrX,1
 					((TX_t:= Enquote(SCiTxTrX))? EndAppend:= 2)
 				}
-			case,	"Not"	: switch,SCiTxTrX {
+					case,	"Not"	: switch,SCiTxTrX {
 					case,	"true"	: TX_t:= "False", EndAppend:= 1
 					case,	"false"	: TX_t:= "True", EndAppend:= -1
 					case,	"black"	: TX_t:= "White"
@@ -73,7 +73,7 @@ TxtSelReplace(action="") {
 					Notice:= False
 					if(NotFound) {
 						sendmessage,2143,0,0,,ahk_id %cWnd% 
-						sendmessage,2190,% SelStart:= Errorlevel,0,,ahk_id %cWnd% ;SETTARGETSTART:=2190
+						sendmessage,2190,% SelStart:= Errorlevel,0,,ahk_id %cWnd%	;SETTARGETSTART:=2190
 						sendmessage,2160,SelStart,SelStart,,ahk_id %cWnd%			;SETSEL:=2160
 						return,0
 					}
@@ -172,18 +172,19 @@ UnEnquote(target="") { ; ="(?:^)(" Chr(34) ")|(?:^.)(" chr(34) ")|(" chr(34) ")(
 }
 
 Capitalise(target="") { ;(\b\w)(.*?)||(s(?=cript))
- return,Regexreplace(target,"(_?\w)|(\b\w)(?:.*?)","$U1L2")
+ return,Regexreplace(target,"(_?\w)|(\b\w)(?:.*?)","$U1$L2")
 }
 
 CapitaliseWithWords(Target="") { ;always capitalised;
-	Static Global  Xlist := "AHK,AutoHotKey,Var,Obj,Replace,Get,App_end,Invert,Byte,Hex,Replace,Regex,Format,Exit,String,Target,StrLen" 
+	Static Global  Xlist := "AHK,AutoHotKey,Var,Obj,Replace,Append,Invert,Byte,Hex,Replace,RegEx,Format,Exit,String,Target,StrLen" 
 	Repl:= Found:= ""
-	try,if(S:= RegExReplace(lowercase(target) ,"(\b\w)(?:.*?)|((_\w)|(\w_))","$U1$2"))
+	try,if(S:= RegExReplace(target ,"(\b\w)(?:.*?)|((_\w)|(\w_))","$U1$L2")){
 		Loop,Parse,% XList,`, ;Parse exceptions;
 			if(instr(target,A_loopfield)) {
-				Repl:= regexreplace(Repl?Repl:S,"i)(" . SubStr(a_Loopfield, 1 , 1) . ")(" .  (XL_:=SubStr(A_LoopField,2,StrLen(A_LoopField)))  . ")",A_loopfield)
+				Repl:= regexreplace(Repl?Repl:S,"(" . SubStr(a_Loopfield, 1 , 1) . ")(" .  (XL_:=SubStr(A_LoopField,2,StrLen(A_LoopField)))  . ")",A_loopfield)
 				Found:= True
 			} (!Found?  Repl:= S)
+			}
 	return,Repl
 }
 
