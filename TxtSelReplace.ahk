@@ -2,14 +2,14 @@ TxtSelReplace(action="") {
 	global Word_Inversion_Dictionary_CSVSTR ;currently defined in caller script.
 	, RX_SCITXT:= ""
 	static Bitwise_Not_Words:= ({"1":	"0"
-						,	"False"	:	"True"
-						,	"White"	:	"White"
-						,	"Yes"	:	"No"
-						,	"Top"	:	"Bottom"
-						,	"Up"	:	"Down"
-						,	"Right"	:	"Left"
-						,	"North"	:	"South"
-						,	"West"	:	"East"})
+			,	"False"	:	"True"
+			,	"White"	:	"black"
+			,	"yes"	:	"no"
+			,	"top"	:	"bottom"
+			,	"up"	:	"down"
+			,	"right"	:	"left"
+			,	"North"	:	"South"
+			,	"West"	:	"East"})
 	, init
 	if(!init) {
 		if Word_Inversion_Dictionary_CSVSTR {
@@ -138,7 +138,6 @@ Byte2Str(Bytes_VarName="",len="",CodePg="CP936") {
 }
 
 UPPERCASE(target="") {
-
  return,regexreplace(target,"(\w)","$U1$2")
 }
 
@@ -147,7 +146,6 @@ lowercase(target="") {
 }
 
 iNVERT_cASE(Target="") { ;toggle;
-tt(Target " cunt")
  return,regexreplace(target,"([A-Z])|([a-z])","$L1$U2")
 }
 
