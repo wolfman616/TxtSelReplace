@@ -3,11 +3,11 @@ TxtSelReplace(action="") {
 	, RX_SCITXT:= ""
 	static Bitwise_Not_Words:= ({"1":	"0"
 						,	"False"	:	"True"
-						,	"White"	:	"White"
-						,	"Yes"	:	"No"
-						,	"Top"	:	"Bottom"
-						,	"Up"	:	"Down"
-						,	"Right"	:	"Left"
+						,	"white"	:	"black"
+						,	"yes"		:	"no"
+						,	"top"		:	"bottom"
+						,	"down"	:	"up"
+						,	"right"	:	"left"
 						,	"North"	:	"South"
 						,	"West"	:	"East"})
 	, init
@@ -27,70 +27,69 @@ TxtSelReplace(action="") {
 		return,0
 	ControlGet,cWnd,Hwnd,,% cname,ahk_id %hwnd%
 	if(instr(cname,"scintilla")) {
-		sendmessage,2006,"","",,ahk_id %cWnd% ;GETLENGTH:=2006;
+		sendmessage,2006,"","",,ahk_id %cWnd% ;GETLENGTH-2006;
 		if(!Sci_FullLen:= errorlevel)
 			return,0
 		VarSetCapacity(RX_SCITXT,Sci_FullLen,0)
 		Sci_SelTxtPTR:= DllCall("VirtualAllocEx","Ptr",(hProc:= DllCall("OpenProcess","UInt",0x438,"Int",False,"UInt",PID
 		,"Ptr")),"Ptr",0,"UPtr",Sci_FullLen,"UInt",0x1000,"UInt",4,"Ptr")
 			sendmessage,2143,0,0,,ahk_id %cWnd%
-			sendmessage,2190,% SelStart:=errorlevel,0,,ahk_id %cWnd%	;SETTARGETSTART:=2190
+			sendmessage,2190,% SelStart:=errorlevel,0,,ahk_id %cWnd%	;SETTARGETSTART-2190;
 			sendmessage,2145,0,0,,ahk_id %cWnd%
-			 sendmessage,2192,% SelEnd:=errorlevel,0,,ahk_id %cWnd%		;SETTARGETEND:=2192;
+			 sendmessage,2192,% SelEnd:=errorlevel,0,,ahk_id %cWnd%		;SETTARGETEND-2192;
 			if(!(SelEnd-SelStart>0))
 				return,0
 		if(action="Unquote") {
 			SelStart--, SelEnd++
-			sendmessage,2160,SelStart-1,SelEnd+1,,ahk_id %cWnd% ;SETSEL:=2160
+			sendmessage,2160,SelStart-1,SelEnd+1,,ahk_id %cWnd% ;SETSEL-2160;
 		} else,if(action="Quote")
-			sendmessage,2160,SelStart-1,SelEnd+1,,ahk_id %cWnd%	;SETSEL:=2160;
-		sendmessage,2161,"",Sci_SelTxtPTR,,ahk_id %cWnd%		;GETSELTEXT:=2161;
+			sendmessage,2160,SelStart-1,SelEnd+1,,ahk_id %cWnd%	;SETSEL-2160;
+		sendmessage,2161,"",Sci_SelTxtPTR,,ahk_id %cWnd%			;GETSELTEXT-2161;
 		Success:= DllCall("ReadProcessMemory","Ptr",hProc,"Ptr",Sci_SelTxtPTR,"Ptr",&RX_SCITXT,"UPtr",Sci_FullLen,"Ptr","")
 		SCiTxTrX:= Byte2Str("RX_SCITXT")
 		if(!Sci_FullLen)
 		 return,0
 		 switch,action {
-			case,		"upper"			: 	TX_t:= uppercase(SCiTxTrX)
-			case,		"lower"			: 	TX_t:= lowercase(SCiTxTrX)
+			case,		"upper"				: 	TX_t:= uppercase(SCiTxTrX)
+			case,		"lower"				: 	TX_t:= lowercase(SCiTxTrX)
 			case,		"Capitalise"	: 	TX_t:= Capitalise(SCiTxTrX)
-			case,"CapitaliseWithWords"	:	TX_t:= CapitaliseWithWords(SCiTxTrX)
 			case,		"CommentLine"	: ((TX_t:= commentline(SCiTxTrX))? (EndAppend:= Strlen(TX_t)-strlen(SCiTxTrX)))
-			case,		"invert"		:	(isInt(SCiTxTrX)? (EndAppend:= strlen(TX_t:= FormatHex(SCiTxTrX))-strlen(SCiTxTrX))
-										: TX_t:= invert_case(SCiTxTrX))
-			case,		"reverse"		:	TX_t:= Capitalise(SCiTxTrX)
-			case,"Enclose_Brackets"		: ((TX_t:= Enclose_Brackets(SCiTxTrX))? 			(EndAppend:=1, StartAppend:= 1))
-			case,"Enclose_Square_Brackets"	: ((TX_t:= Enclose_Square_Brackets(SCiTxTrX))?	(EndAppend:=1, StartAppend:= 1))
-			case,"Enclose_Braces" 			: ((TX_t:= Enclose_Braces(SCiTxTrX))? 			(EndAppend:=1, StartAppend:= 1))
-			case,"Enclose_spaces" 			: if ((TX_t:= StrSurround(SCiTxTrX,"spaces"))!="0") {
-					EndAppend:=1, StartAppend:= 1
+			case,		"invert"			:	(isInt(SCiTxTrX)? (EndAppend:= strlen(TX_t:= FormatHex(SCiTxTrX))-strlen(SCiTxTrX))
+														: 	TX_t:= invert_case(SCiTxTrX))
+			case,		"reverse"			:	TX_t:= Capitalise(SCiTxTrX)
+			case,"Enclose_Braces"	: ((TX_t:= Enclose_Braces(SCiTxTrX))? (EndAppend:=1, StartAppend:= 1))
+			case,"Enclose_spaces"	: if ((TX_t:= StrSurround(SCiTxTrX,"spaces"))!="0") {
+					case,"CapitaliseWithWords"	:	TX_t:= CapitaliseWithWords(SCiTxTrX)
+					case,"Enclose_Brackets"		: ((TX_t:= Enclose_Brackets(SCiTxTrX))? (EndAppend:=1, StartAppend:= 1))
+					case,"Enclose_Square_Brackets"	: ((TX_t:= Enclose_Square_Brackets(SCiTxTrX))?	(EndAppend:=1, StartAppend:= 1))
+						EndAppend:=1, StartAppend:= 1
 				} else return,0
-			case,"Enclose_Percents"			: ((TX_t:= Enclose_Percents(SCiTxTrX))? (		 EndAppend:=1, StartAppend:= 1))
-			case,			"Quote"			: if(instr(SCiTxTrX,chr(34))) {
+			case,"Enclose_Percents"	: ((TX_t:= Enclose_Percents(SCiTxTrX))? (		 EndAppend:=1, StartAppend:= 1))
+			case,			"Quote"				: if(instr(SCiTxTrX,chr(34))) {
 					((TX_t:=unEnquote(SCiTxTrX))? (action:="unquote", EndAppend:= -2))
 				} else {
-					sendmessage,2142,SelStart,0,,ahk_id %cWnd%	;SETSELECTIONSTART:=2142;
-					sendmessage,2144,SelEnd,0,,ahk_id %cWnd% 	;SETSELECTIONEND:=2144;
+					sendmessage,2142,SelStart,0,,ahk_id %cWnd%	;SETSELECTIONSTART-2142;
+					sendmessage,2144,SelEnd,0,,ahk_id %cWnd% 	;SETSELECTIONEND-2144;
 					StringTrimleft,SCiTxTrX,SCiTxTrX,1
 					StringTrimright,SCiTxTrX,SCiTxTrX,1
 					((TX_t:= Enquote(SCiTxTrX))? EndAppend:= 2)
 				}
-			case,"Not"	: 
-					for,normal,inverted in bitwise_not_words
+			case,"Not"	: for,normal,inverted in bitwise_not_words
 						(normal=Scitxtrx? TX_t:=inverted : (inverted=Scitxtrx? TX_t:=normal))
 				if(!strlen(TX_t)) {
 					(isHex:= instr(SCiTxTrX,"0x")? (EndAppend:= strlen(TX_t:= FormatDec(SCiTxTrX)) -strlen(SCiTxTrX) )
 					: (isInt(SCiTxTrX)? (EndAppend:=strlen(TX_t:= FormatHex(SCiTxTrX))-strlen(SCiTxTrX)) : NotFound:= True))
 					if(NotFound) {
 						sendmessage,2143,0,0,,ahk_id %cWnd%
-						sendmessage,2190,% SelStart:= Errorlevel,0,,ahk_id %cWnd%	;SETTARGETSTART:=2190
-						sendmessage,2160,SelStart,SelStart,,ahk_id %cWnd%			;SETSEL:=2160
+						sendmessage,2190,% SelStart:= Errorlevel,0,,ahk_id %cWnd%	;SETTARGETSTART-2190;
+						sendmessage,2160,SelStart,SelStart,,ahk_id %cWnd%					;SETSEL-2160;
 						return,0
 		}		}	}
 		sendmessage,2143,0,0,,ahk_id %cWnd%
-		sendmessage,2190,% SelStart:= Errorlevel,0,,ahk_id %cWnd%	;SETTARGETSTART:=2190
+		sendmessage,2190,% SelStart:= Errorlevel,0,,ahk_id %cWnd%	;SETTARGETSTART-2190;
 		sendmessage,2145,0,0,,ahk_id %cWnd%
-		sendmessage,2192,% SelEnd:= Errorlevel,0,,ahk_id %cWnd%		;SETTARGETEND:=2192
-		sendmessage,2160,SelStart,SelEnd,,ahk_id %cWnd%				;SETSEL:=2160
+		sendmessage,2192,% SelEnd:= Errorlevel,0,,ahk_id %cWnd%		;SETTARGETEND-2192;
+		sendmessage,2160,SelStart,SelEnd,,ahk_id %cWnd%						;SETSEL-2160;
 		(action="not"? SelEnd:=SelStart+strlen(TX_t))
 		if(!(len2:= SelEnd-SelStart)>0)
 			return,0
@@ -102,10 +101,10 @@ TxtSelReplace(action="") {
 		,   success:= DllCall("WriteProcessMemory","Ptr",hProc,"Ptr",vAlloxAddress,"Ptr",&vAlloxStr,"Uint",len2+1,"UInt*","","Int")
 		EndAppend? SelEnd+=EndAppend:()
 		StartAppend? SelStart+=StartAppend:()
-		sendmessage,2170,0,vAlloxAddress,,ahk_id %cWnd%	;REPLACESEL:=2170;
+		sendmessage,2170,0,vAlloxAddress,,ahk_id %cWnd%	;REPLACESEL-2170;
 		(action="unquote")? ((e!=1||f)? (SelStart++, SelEnd--):()):()
-		sendmessage,2142,SelStart,0,,ahk_id %cWnd%		;(SETSELECTIONSTART):=2142;
-		sendmessage,2144,SelEnd,0,,ahk_id %cWnd%		;SETSELECTIONEND:=2144;
+		sendmessage,2142,SelStart,0,,ahk_id %cWnd%	;SETSELECTIONSTART-2142;
+		sendmessage,2144,SelEnd,0,,ahk_id %cWnd%		;SETSELECTIONEND-2144;
 		DllCall("VirtualFreeEx","Ptr",hProc,"Ptr",vAlloxAddress,"UPtr",0,"UInt",0x8000) ;MEM_RELEASE;
 		, DllCall("VirtualFreeEx","Ptr",hProc,"Ptr",Sci_SelTxtPTR,"UPtr",0,"UInt",0x8000)!
 		,  DllCall("CloseHandle","Ptr",hProc)
@@ -115,14 +114,14 @@ TxtSelReplace(action="") {
 		if(strlen(sel)<1)
 			return,
 		switch,action {
-			case,"upper"				: sendmessage,0xC2,1,&sel:= Uppercase(sel)	,,ahk_id %cWnd% ;EM_REPLACESEL;0xc2;
-			case,"lower"				: sendmessage,0xC2,1,&sel:= lowercase(sel)	,,ahk_id %cWnd%
-			case,"invert" 				: sendmessage,0xC2,1,&sel:= invert_case(sel),,ahk_id %cWnd%
-			case,"reverse" 				: sendmessage,0xC2,1,&sel:= Capitalise(sel)	,,ahk_id %cWnd%
-			case,"commentline"			: sendmessage,0xC2,1,&sel:= Capitalise(sel)	,,ahk_id %cWnd%
-			case,"quote" 				: sendmessage,0xC2,1,&sel:= StrSurround(sel,"quotes"),,ahk_id %cWnd%
-			case,"Capitalise"			: sendmessage,0xC2,1,&sel:= Capitalise(sel)	,,ahk_id %cWnd%
-			case,"CapitaliseWithWords"	: sendmessage,0xC2,1,&sel:= Capitalise(sel),,ahk_id %cWnd%
+			case,"upper"							: sendmessage,0xC2,1,&sel:= Uppercase(sel)	,,ahk_id %cWnd% ;EM_REPLACESEL-0xc2;
+			case,"lower"							: sendmessage,0xC2,1,&sel:= lowercase(sel)	,,ahk_id %cWnd%
+			case,"invert" 						: sendmessage,0xC2,1,&sel:= invert_case(sel),,ahk_id %cWnd%
+			case,"reverse" 						: sendmessage,0xC2,1,&sel:= Capitalise(sel)	,,ahk_id %cWnd%
+			case,"commentline"				: sendmessage,0xC2,1,&sel:= Capitalise(sel)	,,ahk_id %cWnd%
+			case,"quote" 							: sendmessage,0xC2,1,&sel:= StrSurround(sel,"quotes"),,ahk_id %cWnd%
+			case,"Capitalise"					: sendmessage,0xC2,1,&sel:= Capitalise(sel)	,,ahk_id %cWnd%
+			case,"CapitaliseWithWords": sendmessage,0xC2,1,&sel:= Capitalise(sel),,ahk_id %cWnd%
 			case,"Enclose_Brackets"		: sendmessage,0xC2,1,&sel:= Enclose_Brackets(sel),,ahk_id %cWnd%
 			case,"Enclose_Braces" 		: sendmessage,0xC2,1,&sel:= Enclose_Braces(sel),,ahk_id %cWnd%
 			case,"Enclose_Percents"		: sendmessage,0xC2,1,&sel:= Enclose_Percents(sel),,ahk_id %cWnd%
@@ -138,7 +137,6 @@ Byte2Str(Bytes_VarName="",len="",CodePg="CP936") {
 }
 
 UPPERCASE(target="") {
-
  return,regexreplace(target,"(\w)","$U1$2")
 }
 
@@ -147,7 +145,6 @@ lowercase(target="") {
 }
 
 iNVERT_cASE(Target="") { ;toggle;
-tt(Target " cunt")
  return,regexreplace(target,"([A-Z])|([a-z])","$L1$U2")
 }
 
@@ -180,7 +177,7 @@ StrSurround(input="",SurroundWith="") {
  if(eRRORlEVEL)
   return,0
  ControlGet,cWnd,Hwnd,,% cname,ahk_id %hwnd%
- sendmessage,2372,0,0,,ahk_id %cWnd% ;ISSELRECT:=2160
+ sendmessage,2372,0,0,,ahk_id %cWnd% ;ISSELRECT-2160
  if errorlevel || if (regexmatch(input,"\s")&&!(regexmatch(input,"\w\d")))
   return,0
  return,r:= (input=""? SurroundWith : SurroundWith . input . SurroundWith)
@@ -212,7 +209,7 @@ CapitaliseWithWords(Target="") { ;Always Capitalised;
 }
 
 FormatHex(Str_in="") {
-	return,ret:=(Str_in="")?"0x" : Format("{:#X}",Str_in)
+	return,ret:= (Str_in="")?"0x" : Format("{:#X}",Str_in)
 }
 
 FormatDec(Str_in="") {
