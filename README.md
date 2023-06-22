@@ -1,6 +1,9 @@
 # TxtSelReplace
 RegEx case substitutions and surrounds within Text selections (Scintilla, Rich Text, Comctl Edit)
-Some are togglable
+Some words can be togglable to alternate words defined in a dictionary array when calling this function with the argument "not"
+in principle simillar to a bitwise "!" declaration.
+Word Inversion pairs can be added via definiing the comma seperated string "Word_Inversion_Dictionary_CSVSTR" from the caller script.
+"Light,Dark,Hot,Cold" and so forth.
 todo: rectangular selections, multi selections
 
 use:
