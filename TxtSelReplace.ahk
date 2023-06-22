@@ -18,7 +18,7 @@ TxtSelReplace(action="") {
 				,MaxI:= A_index 
 			 if(instr(d/2,".5"))
 				msgbox,% "uneven set of pairs for insertion to dictionary: " MaxI
-		} init:= true
+		} init:= True
 	}
 	hwnd:= winexist("A")
 	winget,pid,pid,ahk_id %hwnd%
