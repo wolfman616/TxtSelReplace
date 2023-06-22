@@ -6,10 +6,10 @@ TxtSelReplace(action="") {
             ,  "white"  :  "black"
             ,  "yes"    :  "no"
             ,  "top"    :  "bottom"
-            ,  "down"  :  "up"
+            ,  "down"   :  "up"
             ,  "right"  :  "left"
             ,  "North"  :  "South"
-            ,  "West"  :  "East"})
+            ,  "West"   :  "East"})
   , init
   if(!init) {
     if Word_Inversion_Dictionary_CSVSTR {
@@ -57,13 +57,13 @@ TxtSelReplace(action="") {
       case,    "CommentLine"    : ((TX_t:= commentline(SCiTxTrX))? (EndAppend:= Strlen(TX_t)-strlen(SCiTxTrX)))
       case,    "invert"         :  (isInt(SCiTxTrX)? (EndAppend:= strlen(TX_t:= FormatHex(SCiTxTrX))-strlen(SCiTxTrX)) : TX_t:= invert_case(SCiTxTrX))
       case,    "reverse"        :   TX_t:= Capitalise(SCiTxTrX)
-      case,"Enclose_Brackets"   : ((TX_t:= Enclose_Brackets(SCiTxTrX))? (EndAppend:=1, StartAppend:= 1))
-      case,"Enclose_Square_Brackets"  : ((TX_t:= Enclose_Square_Brackets(SCiTxTrX))?  (EndAppend:=1, StartAppend:= 1))
-      case,"Enclose_Braces"     : ((TX_t:= Enclose_Braces(SCiTxTrX))? (EndAppend:=1, StartAppend:= 1))
-      case,"Enclose_spaces"     : if((TX_t:= StrSurround(SCiTxTrX,"spaces"))!="0") {
+      case,  "Enclose_Brackets" : ((TX_t:= Enclose_Brackets(SCiTxTrX))? (EndAppend:=1, StartAppend:= 1))
+      case,  "Enclose_Braces"   : ((TX_t:= Enclose_Braces(SCiTxTrX))? (EndAppend:=1, StartAppend:= 1))
+      case,  "Enclose_spaces"   : if((TX_t:= StrSurround(SCiTxTrX,"spaces"))!="0") {
         EndAppend:=1, StartAppend:= 1
         } else,return,0
       case,"Enclose_Percents"   : ((TX_t:= Enclose_Percents(SCiTxTrX))? (EndAppend:=1, StartAppend:= 1))
+      case,"Enclose_Square_Brackets"  : ((TX_t:= Enclose_Square_Brackets(SCiTxTrX))?  (EndAppend:=1, StartAppend:= 1))
       case,      "Quote"        : if(instr(SCiTxTrX,chr(34))) {
           ((TX_t:=unEnquote(SCiTxTrX))? (action:="unquote", EndAppend:= -2))
         } else {
